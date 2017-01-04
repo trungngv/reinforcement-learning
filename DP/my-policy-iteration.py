@@ -65,16 +65,52 @@ def policy_improvement(env, policy_eval_fn=policy_eval, discount_factor=1.0):
     """
     # Start with a random policy
     policy = np.ones([env.nS, env.nA]) / env.nA
-    
     while True:
-        # Implement this!
-        break
-    
-    return policy, np.zeros(env.nS)
-    
-random_policy = np.ones([env.nS, env.nA]) / env.nA
-v = policy_eval(random_policy, env)
+        # Compute optimal value function for the given policy
+        V = policy_eval(policy, env, discount_factor)
+        
+        # Policy is not stable if we make any changes to the policy
+        policy_stable = True
+        
+        # Compute new greedy policy given new value function
+        for s in range(env.nS):
+            # Current best action
+            current_best_a = np.argmax(policy[s])
 
-expected_v = np.array([0, -14, -20, -22, -14, -18, -20, -20, -20, -20, -18, -14, -22, -20, -14, 0])
+            # Find the value for each action
+            action_values = np.zeros(env.nA)
+            # This is only 1-step look-ahead (coarse approximation), deeper look-ahead will lead to better approximation
+            # and thus overall performance
+            for a in range(env.nA):
+                for prob, next_state, reward, done in env.P[s][a]:
+                    action_values[a] += prob * (reward + discount_factor * V[next_state])
+            best_a = np.argmax(action_values)
+            if current_best_a != best_a:
+                policy_stable = False
+                
+            # Quick way to set policy to the best    
+            policy[s] = np.eye(env.nA)[best_a]
+            
+        if policy_stable:
+            return policy, V
+    
+policy, v = policy_improvement(env)
+print("Policy Probability Distribution:")
+print(policy)
+print("")
+
+print("Reshaped Grid Policy (0=up, 1=right, 2=down, 3=left):")
+print(np.reshape(np.argmax(policy, axis=1), env.shape))
+print("")
+
+print("Value Function:")
+print(v)
+print("")
+
+print("Reshaped Grid Value Function:")
+print(v.reshape(env.shape))
+print("")
+
+# Test the value function
+expected_v = np.array([ 0, -1, -2, -3, -1, -2, -3, -2, -2, -3, -2, -1, -3, -2, -1,  0])
 np.testing.assert_array_almost_equal(v, expected_v, decimal=2)
-
