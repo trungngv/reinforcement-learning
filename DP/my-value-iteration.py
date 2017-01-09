@@ -39,18 +39,17 @@ def value_iteration(env, theta=0.0001, discount_factor=1.0):
         """
         A = np.zeros(env.nA)
         for a in range(env.nA):
-            for prob, next_state, reward, done in env.P[s][a]:
+            for prob, next_state, reward, done in env.P[state][a]:
                 A[a] += prob * (reward + discount_factor * V[next_state])
                 
         return A
-        
-        
+
     V = np.zeros(env.nS)
-    delta = 0
     iter_cnt = 0
     
     while True:
         iter_cnt += 1
+        delta = 0
         # for each state
         for s in range(env.nS):
             A = one_step_lookahead(s, V)
@@ -61,7 +60,6 @@ def value_iteration(env, theta=0.0001, discount_factor=1.0):
             # TODO: what if we get expected value instead of the best action value?
             V[s] = best_action_value
             
-        print("delta = {}".format(delta))
         # Can we stop?
         if delta < theta:
             break
