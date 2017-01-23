@@ -38,9 +38,10 @@ def make_epsilon_greedy_policy(Q, epsilon, nA):
         return A
     return policy_fn
 
-def sarsa(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
+def q_learning(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
     """
-    SARSA algorithm: On-policy TD control. Finds the optimal epsilon-greedy policy.
+    Q-Learning algorithm: Off-policy TD control. Finds the optimal greedy policy
+    while following an epsilon-greedy policy
     
     Args:
         env: OpenAI environment.
@@ -50,7 +51,7 @@ def sarsa(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
         epsilon: Chance the sample a random action. Float betwen 0 and 1.
     
     Returns:
-        A tuple (Q, stats).
+        A tuple (Q, episode_lengths).
         Q is the optimal action-value function, a dictionary mapping state -> action values.
         stats is an EpisodeStats object with two numpy arrays for episode_lengths and episode_rewards.
     """
@@ -97,6 +98,6 @@ def sarsa(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
 
     return Q, stats    
     
-Q, stats = sarsa(env, 200)
+Q, stats = q_learning(env, 500)
 plotting.plot_episode_stats(stats)
     
